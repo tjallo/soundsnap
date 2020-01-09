@@ -1,0 +1,75 @@
+#!/bin/bash
+cd "`dirname "$0"`"
+ 
+mkdir .temp
+mkdir Sounds
+cd .temp
+echo "Ik ben opzoek naar: "
+woord=$(sed -e 's/ /+/g' woord.txt)
+cd ..
+mkdir Sounds
+mkdir Sounds/$woord
+find Sounds/$woord/ -maxdepth 1 -type d > counter.txt
+cat counter.txt | wc -l > actual
+rm counter.txt
+value=$(sed 's/^[ \t]*//;s/[ \t]*$//' actual) 
+echo "$value"
+cd Sounds
+cd $woord
+mkdir $value
+cd ..
+cd ..
+let value2=$(sed 's/^[ \t]*//;s/[ \t]*$//' actual)
+let pageNr=($value2 - 1)
+rm actual
+echo $pageNr
+let "countspot = $value2 - 1"
+cd Sounds
+mkdir $woord
+
+cd ..
+cd .temp
+wget -O $woord.html https://www.soundsnap.com/search/audio/$woord?page=$pageNr
+sleep 2
+grep "/play" $woord.html > temp.txt
+grep -o '".*"' temp.txt | sed 's/"//g' > temp2.txt
+grep -o '".*"' $woord.html | sed 's/"//g' > Dogtemp2.txt
+rm temp.txt
+grep -o '\b[^\.]*\.mp3\b' Dogtemp2.txt > Dogtemp.txt
+sed 's/^.\{20\}//g' Dogtemp.txt > $naam.tempTxt
+rm Dogtemp2.txt
+rm Dogtemp.txt
+sed -i -e 's/^/soundsnap.com/' temp2.txt
+sed -i -e 's/^/wget -O /' $naam.tempTxt
+sed 's/\///g' .tempTxt > name.temp
+rm .tempTxt
+rm $woord.html
+cd ..
+mkdir BUSY
+paste .temp/name.temp .temp/temp2.txt > Sounds/"$woord"/"$value"/executable.tmp
+cd .temp
+rm name.temp
+rm temp2.txt
+cd ..
+cd Sounds
+cd $woord
+cd $value
+sudo chmod +x executable.tmp
+./executable.tmp
+rm executable.tmp
+for x in *.mp3
+  do mv -- "$x" "${x//%20/ }" 
+done
+cd ..
+cd ..
+cd ..
+cd .temp
+rm temp2.txt-e
+rm .tempTxt-e
+cd ..
+rmdir BUSY
+rmdir .temp
+#mkdir DONE
+#clear
+echo "DONE"
+#rmdir DONE
